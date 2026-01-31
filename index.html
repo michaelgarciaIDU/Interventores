@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<title>Malla vial - Edición Inmediata</title>
+
+<link rel="stylesheet" href="https://js.arcgis.com/3.22/esri/css/esri.css">
+<script src="https://js.arcgis.com/3.22/"></script>
+
+<style>
+html, body { height: 100%; margin: 0; font-family: Arial; }
+#contenedor { display: flex; height: 100%; }
+#izquierda { width: 70%; display: flex; flex-direction: column; }
+#map { height: 55%; background: #f0f0f0; }
+#tablaContainer { height: 45%; overflow: auto; border-top: 2px solid #ccc; }
+#derecha { width: 30%; border-left: 2px solid #ddd; display: flex; flex-direction: column; }
+#panelFallas, #panelFotos { height: 50%; padding: 10px; overflow: auto; }
+#panelFallas { border-bottom: 2px solid #ddd; }
+
+table { width: 100%; border-collapse: collapse; font-size: 11px; }
+th { background: #063856; color: white; padding: 8px; position: sticky; top: 0; z-index: 10; }
+td { padding: 8px; border: 1px solid #ddd; text-align: center; }
+tr:hover { background: #f1f1f1; cursor: pointer; }
+
+.celda-editable { cursor: dblclick; font-weight: bold; min-width: 110px; transition: background 0.2s; }
+.estado-aprobado { color: #155724; background-color: #d4edda !important; }
+.estado-no-aprobado { color: #721c24; background-color: #f8d7da !important; }
+.estado-pendiente { color: #856404; background-color: #fff3cd !important; }
+
+.hidden { display: none !important; }
+.select-editor { width: 100%; padding: 2px; }
+</style>
+</head>
+
+<body>
+
+<div id="contenedor">
+  <div id="izquierda">
+    <div id="map"></div>
+    <div id="tablaContainer">
+      <table id="tablaMalla">
+        <thead>
+          <tr>
+            <th>PK Calzada</th>
+            <th>PK UM</th>
+            <th>Superficie</th>
+            <th>Visto Bueno (Doble clic)</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div id="derecha">
+    <div id="panelFallas">
+      <h3>Fallas</h3>
+      <table id="tablaFallas">
+        <thead>
+          <tr>
+            <th>PK Calzada</th>
+            <th>Superficie</th>
+            <th>Falla</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div id="panelFotos">
+      <h3>Fotos</h3>
+      <em>Seleccione una malla para ver fotos</em>
+    </div>
+  </div>
+</div>
+
+<script>
+require([
+  "esri/map",
+  "esri/layers/FeatureLayer",
+  "esri/IdentityManager",
+  "esri/graphic",
+  "dojo/domReady!"
+], function (Map, FeatureLayer, esriId, Graphic) {
+
+  esriId.registerOAuthInfos([{
+    appId: "IB1rEgaJRGpotuGY",
+    portalUrl: "https://www.arcgis.com",
+    popup: false
+  }]);
+
+  esriId.getCredential("https://www.arcgis.com").then(iniciarApp);
+
+  function iniciarApp() {
+    const usuario = esriId.credentials[0].userId;
+    const map = new Map("map", { basemap: "gray", center: [-74.1, 4.65], zoom: 11 });
+
+    const mallaLayer = new FeatureLayer(
+      "https://services3.arcgis.com/7Be6bWZhk16f3JwA/arcgis/rest/services/Malla_Vial_Contratista_2026_view/FeatureServer/0",
+      { outFields: ["*"], mode: FeatureLayer.MODE_ONDEMAND, definitionExpression: "Interventor = '" + usuario + "'" }
+    );
+
+    const fallasLayer = new FeatureLayer(
+      "https://services3.arcgis.com/7Be6bWZhk16f3JwA/arcgis/rest/services/Malla_Vial_Contratista_2026_view/FeatureServer/1",
+      { outFields: ["*"], definitionExpression: "Interventor = '" + usuario + "'" }
+    );
+
+    map.addLayers([mallaLayer, fallasLayer]);
+
+    let tablaCargadaTotal = false;
+    mallaLayer.on("update-end", function() {
+      if (!tablaCargadaTotal) {
+        cargarTablaMalla();
+        tablaCargadaTotal = true;
+      }
+    });
+
+    function cargarTablaMalla() {
+      const tbody = document.querySelector("#tablaMalla tbody");
+      tbody.innerHTML = "";
+
+      const query = new esri.tasks.Query();
+      query.where = "Interventor = '" + usuario + "'";
+      query.outFields = ["*"];
+      query.returnGeometry = true;
+
+      mallaLayer.queryFeatures(query).then(function (res) {
+        res.features.forEach(function (g) {
+          const tr = document.createElement("tr");
+          const valActual = g.attributes.Validacion_Interventoria || "Pendiente";
+          const oid = g.attributes.objectid || g.attributes.OBJECTID;
+
+          function aplicarEstiloCelda(celda, valor) {
+            celda.classList.remove("estado-aprobado", "estado-no-aprobado", "estado-pendiente");
+            if (valor === "Aprobado") celda.classList.add("estado-aprobado");
+            else if (valor === "No Aprobado") celda.classList.add("estado-no-aprobado");
+            else celda.classList.add("estado-pendiente");
+          }
+
+          tr.innerHTML = `
+            <td>${g.attributes.PK_ID_CALZ || ""}</td>
+            <td>${g.attributes.PK_UM || ""}</td>
+            <td>${g.attributes.superficie || ""}</td>
+            <td class="celda-editable" title="Doble clic para editar">
+              <span class="label-visto">${valActual}</span>
+              <select class="select-editor hidden">
+                <option value="Pendiente" ${valActual === "Pendiente" ? "selected" : ""}>Pendiente</option>
+                <option value="Aprobado" ${valActual === "Aprobado" ? "selected" : ""}>Aprobado</option>
+                <option value="No Aprobado" ${valActual === "No Aprobado" ? "selected" : ""}>No Aprobado</option>
+              </select>
+            </td>
+          `;
+
+          const tdEdit = tr.querySelector(".celda-editable");
+          aplicarEstiloCelda(tdEdit, valActual);
+          
+          const label = tdEdit.querySelector(".label-visto");
+          const select = tdEdit.querySelector(".select-editor");
+
+          // DOBLE CLIC PARA ABRIR EL SELECT
+          tdEdit.ondblclick = function(e) {
+            e.stopPropagation();
+            label.classList.add("hidden");
+            select.classList.remove("hidden");
+            select.focus();
+          };
+
+          // EVENTO DE CAMBIO (UPDATE)
+          select.onchange = function(e) {
+            const nuevoValor = select.value;
+
+            // 1. Actualización Visual Inmediata (Feedback al usuario)
+            label.innerText = nuevoValor;
+            aplicarEstiloCelda(tdEdit, nuevoValor);
+            
+            // 2. Preparar objeto para ArcGIS
+            const editGraphic = new Graphic();
+            editGraphic.attributes = {};
+            editGraphic.attributes[mallaLayer.objectIdField] = oid;
+            editGraphic.attributes["Validacion_Interventoria"] = nuevoValor;
+
+            // 3. Enviar a base de datos
+            mallaLayer.applyEdits(null, [editGraphic], null).then(function(res) {
+              if (res[0].success) {
+                console.log("Servidor actualizado");
+                g.attributes["Validacion_Interventoria"] = nuevoValor;
+              }
+            });
+
+            // 4. Salir del modo edición
+            finalizar();
+          };
+
+          // SI EL USUARIO HACE CLIC FUERA SIN CAMBIAR NADA
+          select.onblur = function() {
+            // Un pequeño delay para permitir que el onchange ocurra primero si se seleccionó algo
+            setTimeout(finalizar, 150);
+          };
+
+          function finalizar() {
+            select.classList.add("hidden");
+            label.classList.remove("hidden");
+          }
+
+          tr.onclick = function () {
+            if (g.geometry) {
+              if (g.geometry.type === "point") map.centerAndZoom(g.geometry, 17);
+              else map.setExtent(g.geometry.getExtent().expand(1.5), true);
+            }
+            fallasLayer.setDefinitionExpression("pk_id_calzada = '" + g.attributes.PK_ID_CALZ + "'");
+            cargarFotosFalla(oid);
+          };
+
+          tbody.appendChild(tr);
+        });
+      });
+    }
+
+    function mostrarFallas(layer) {
+      layer.on("update-end", function () {
+        const tbody = document.querySelector("#tablaFallas tbody");
+        tbody.innerHTML = "";
+        layer.graphics.forEach(function (g) {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `<td>${g.attributes.pk_id_calzada}</td><td>${g.attributes.tipo_superficie}</td><td>${g.attributes.tipo_falla}</td>`;
+          tbody.appendChild(tr);
+        });
+      });
+    }
+
+    function cargarFotosFalla(objectid) {
+      const panel = document.getElementById("panelFotos");
+      panel.innerHTML = "<em>Cargando fotos...</em>";
+      mallaLayer.queryAttachmentInfos(objectid).then(function (attachments) {
+        panel.innerHTML = "<h3>Fotos</h3>";
+        if (!attachments.length) { panel.innerHTML += "Sin fotos"; return; }
+        attachments.forEach(function (att) {
+          const img = document.createElement("img");
+          img.src = att.url; img.style.width = "90%"; img.style.margin = "10px auto"; img.style.display = "block";
+          panel.appendChild(img);
+        });
+      });
+    }
+    mostrarFallas(fallasLayer);
+  }
+});
+</script>
+</body>
+</html>
