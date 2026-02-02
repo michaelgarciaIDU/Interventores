@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="utf-8" />
-<title>Malla vial - Edición Inmediata</title>
+<title>Malla vial - Contratos 2026</title>
 
 <link rel="stylesheet" href="https://js.arcgis.com/3.22/esri/css/esri.css">
 <script src="https://js.arcgis.com/3.22/"></script>
@@ -41,10 +41,27 @@ tr:hover { background: #f1f1f1; cursor: pointer; }
       <table id="tablaMalla">
         <thead>
           <tr>
-            <th>PK Calzada</th>
-            <th>PK UM</th>
-            <th>Superficie</th>
-            <th>Visto Bueno (Doble clic)</th>
+            <th>Fecha de Captura</th>
+            <th>PK ID Calzada</th>
+            <th>Ancho de Calzada</th>
+            <th>área de Calzada</th>
+            <th>Longitud de Calzada</th>
+            <th>PK ID Unidad Muestra</th>
+            <th>área de unidad muestra</th>
+            <th>Longitud de unidad muestra</th>
+            <th>Ancho de unidad muestra</th>
+            <th>Tipo de Diagnóstico</th>
+            <th>Fecha de Intervención</th>
+            <th>Tipo de Intervención</th>
+            <th>área de intervención</th>
+            <th>Inversión</th>
+            <th>Metodología de Inspección</th>
+            <th>Tipo de Superficie</th>
+            <th>Número de losas</th>
+            <th>PCI Calzada</th>
+            <th>PCI Unidad de Muestra</th>
+            <th>Observaciones</th>
+            <th>Visto Bueno</th>
           </tr>
         </thead>
         <tbody></tbody>
@@ -98,13 +115,95 @@ require([
       "https://services3.arcgis.com/7Be6bWZhk16f3JwA/arcgis/rest/services/Malla_Vial_Contratista_2026_view/FeatureServer/0",
       { outFields: ["*"], mode: FeatureLayer.MODE_ONDEMAND, definitionExpression: "Interventor = '" + usuario + "'" }
     );
+    const malla2026 = new FeatureLayer(
+        "https://services3.arcgis.com/7Be6bWZhk16f3JwA/arcgis/rest/services/Calzada_2026/FeatureServer/0",
+        {
+          outFields: ["*"],
+          mode: FeatureLayer.MODE_ONDEMAND
+        }
+      );
+
+      const symbolMalla = new esri.symbol.SimpleFillSymbol(
+        esri.symbol.SimpleFillSymbol.STYLE_SOLID,
+        new esri.symbol.SimpleLineSymbol(
+          esri.symbol.SimpleLineSymbol.STYLE_SOLID,
+          new esri.Color([0, 0, 0, 1]),
+          2.93
+        ),
+        new esri.Color([185, 186, 184, 0.5])
+      );
+
+      const rendererMalla = new esri.renderer.SimpleRenderer(symbolMalla);
+      malla2026.setRenderer(rendererMalla);
+
+      // Visible solo a escalas cercanas (tipo Streets)
+      malla2026.setScaleRange(10000, 0);
+    const UnidadMuestra = new FeatureLayer(
+      "https://services3.arcgis.com/7Be6bWZhk16f3JwA/arcgis/rest/services/UnidaddeMuestraMV2026/FeatureServer/0",
+      { outFields: ["*"], mode: FeatureLayer.MODE_ONDEMAND}
+    );
+    const symbolMallaUM = new esri.symbol.SimpleFillSymbol(
+        esri.symbol.SimpleFillSymbol.STYLE_SOLID,
+        new esri.symbol.SimpleLineSymbol(
+          esri.symbol.SimpleLineSymbol.STYLE_SOLID,
+          new esri.Color([66, 220, 4, 1]),
+          2.93
+        ),
+        new esri.Color([9, 204, 6, 0.6])
+      );
+
+      const rendererUM = new esri.renderer.SimpleRenderer(symbolMallaUM);
+      UnidadMuestra.setRenderer(rendererUM);
+
+      // Visible solo a escalas cercanas (tipo Streets)
+      UnidadMuestra.setScaleRange(10000, 0);
 
     const fallasLayer = new FeatureLayer(
       "https://services3.arcgis.com/7Be6bWZhk16f3JwA/arcgis/rest/services/Malla_Vial_Contratista_2026_view/FeatureServer/1",
       { outFields: ["*"], definitionExpression: "Interventor = '" + usuario + "'" }
     );
+    const labelCalzada = new esri.layers.LabelClass({
+      labelExpressionInfo: {
+        value: "{PK_ID_CALZADA}"
+      },
+      symbol: new esri.symbol.TextSymbol(
+        "{PK_ID_CALZADA}"
+      ).setColor(new esri.Color([0, 0, 0, 1]))
+      .setFont(new esri.symbol.Font(
+        "9pt",
+        esri.symbol.Font.STYLE_NORMAL,
+        esri.symbol.Font.VARIANT_NORMAL,
+        esri.symbol.Font.WEIGHT_BOLD,
+        "Arial"
+      )),
+      minScale: 10000,
+      maxScale: 0
+    });
 
-    map.addLayers([mallaLayer, fallasLayer]);
+    malla2026.setLabelingInfo([labelCalzada]);
+    malla2026.showLabels = true;
+    const labelUM = new esri.layers.LabelClass({
+    labelExpressionInfo: {
+      value: "{PK_ID_UNIDADMUESTREO}"
+    },
+    symbol: new esri.symbol.TextSymbol()
+      .setColor(new esri.Color([0, 120, 0, 1]))
+      .setFont(new esri.symbol.Font(
+        "9pt",
+        esri.symbol.Font.STYLE_NORMAL,
+        esri.symbol.Font.VARIANT_NORMAL,
+        esri.symbol.Font.WEIGHT_BOLD,
+        "Arial"
+      )),
+    minScale: 10000,
+    maxScale: 0
+  });
+
+  UnidadMuestra.setLabelingInfo([labelUM]);
+  UnidadMuestra.showLabels = true;
+
+    const highlightLayer = new esri.layers.GraphicsLayer();
+    map.addLayers([UnidadMuestra, malla2026, mallaLayer, fallasLayer, highlightLayer ]);
 
     let tablaCargadaTotal = false;
     mallaLayer.on("update-end", function() {
@@ -135,11 +234,29 @@ require([
             else if (valor === "No Aprobado") celda.classList.add("estado-no-aprobado");
             else celda.classList.add("estado-pendiente");
           }
+          console.log(g.attributes);
 
           tr.innerHTML = `
+            <td>${formatearFechaDMY(g.attributes.Fecha_Captura) || ""}</td>
             <td>${g.attributes.PK_ID_CALZ || ""}</td>
+            <td>${g.attributes.ANC_CALZ || ""}</td>
+            <td>${g.attributes.AREA_CALZ || ""}</td>
+            <td>${g.attributes.LONG_CALZ || ""}</td>
             <td>${g.attributes.PK_UM || ""}</td>
+            <td>${g.attributes.AR_UM || ""}</td>
+            <td>${g.attributes.LG_UM || ""}</td>
+            <td>${g.attributes.ANCH_UM || ""}</td>
+            <td>${g.attributes.PRE_DIAGNOSTICO || ""}</td>
+            <td>${g.attributes.Fecha_Intervencion || ""}</td>
+            <td>${g.attributes.Tipo_intervencion || ""}</td>
+            <td>${g.attributes.area_intervencion || ""}</td>
+            <td>${g.attributes.inversion || ""}</td>
+            <td>${g.attributes.ME_INSP || ""}</td>
             <td>${g.attributes.superficie || ""}</td>
+            <td>${g.attributes.NUM_LOSAS || ""}</td>
+            <td>${g.attributes.PCI_CALZ || ""}</td>
+            <td>${g.attributes.PCI_UM || ""}</td>
+            <td>${g.attributes.Observaiones || ""}</td>           
             <td class="celda-editable" title="Doble clic para editar">
               <span class="label-visto">${valActual}</span>
               <select class="select-editor hidden">
@@ -202,6 +319,7 @@ require([
           }
 
           tr.onclick = function () {
+            highlightLayer.clear();
             if (g.geometry) {
               if (g.geometry.type === "point") map.centerAndZoom(g.geometry, 17);
               else map.setExtent(g.geometry.getExtent().expand(1.5), true);
@@ -214,7 +332,17 @@ require([
         });
       });
     }
+    function formatearFechaDMY(valorFecha) {
+      if (!valorFecha) return "";
 
+      const fecha = new Date(valorFecha);
+
+      const dia = String(fecha.getDate()).padStart(2, "0");
+      const mes = String(fecha.getMonth() + 1).padStart(2, "0");
+      const anio = fecha.getFullYear();
+
+      return `${dia}/${mes}/${anio}`;
+    }
     function mostrarFallas(layer) {
       layer.on("update-end", function () {
         const tbody = document.querySelector("#tablaFallas tbody");
@@ -222,12 +350,37 @@ require([
         layer.graphics.forEach(function (g) {
           const tr = document.createElement("tr");
           tr.innerHTML = `<td>${g.attributes.pk_id_calzada}</td><td>${g.attributes.tipo_superficie}</td><td>${g.attributes.tipo_falla}</td>`;
+          tr.onclick = function () {
+            if (g.geometry) {
+              if (g.geometry.type === "point") map.centerAndZoom(g.geometry, 17);
+              else map.setExtent(g.geometry.getExtent().expand(1.5), true);
+              resaltarPunto(g.geometry);
+            }
+          };
           tbody.appendChild(tr);
         });
       });
     }
+    function resaltarPunto(geometry) {
+      highlightLayer.clear();
+
+      const symbol = new esri.symbol.SimpleMarkerSymbol(
+        esri.symbol.SimpleMarkerSymbol.STYLE_CIRCLE,
+        18,
+        new esri.symbol.SimpleLineSymbol(
+          esri.symbol.SimpleLineSymbol.STYLE_SOLID,
+          new esri.Color([255, 0, 0, 1]),
+          3
+        ),
+        new esri.Color([255, 255, 0, 0.7])
+      );
+
+      const graphic = new esri.Graphic(geometry, symbol);
+      highlightLayer.add(graphic);
+    }
 
     function cargarFotosFalla(objectid) {
+      highlightLayer.clear();
       const panel = document.getElementById("panelFotos");
       panel.innerHTML = "<em>Cargando fotos...</em>";
       mallaLayer.queryAttachmentInfos(objectid).then(function (attachments) {
