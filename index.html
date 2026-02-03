@@ -11,14 +11,53 @@
 html, body { height: 100%; margin: 0; font-family: Arial; }
 #contenedor { display: flex; height: 100%; }
 #izquierda { width: 70%; display: flex; flex-direction: column; }
-#map { height: 55%; background: #f0f0f0; }
-#tablaContainer { height: 45%; overflow: auto; border-top: 2px solid #ccc; }
+#map { height: 55%; background: #f0f0f0; position: relative; }
+#tablaContainer { height: 45%; overflow: hidden; border-top: 2px solid #ccc; display: flex; flex-direction: column; }
 #derecha { width: 30%; border-left: 2px solid #ddd; display: flex; flex-direction: column; }
 #panelFallas, #panelFotos { height: 50%; padding: 10px; overflow: auto; }
 #panelFallas { border-bottom: 2px solid #ddd; }
 
+/* Pestañas */
+.tabs {
+  display: flex;
+  background: #f0f0f0;
+  border-bottom: 2px solid #ccc;
+}
+
+.tab {
+  padding: 12px 24px;
+  cursor: pointer;
+  background: #e0e0e0;
+  border: none;
+  border-right: 1px solid #ccc;
+  font-weight: bold;
+  transition: background 0.3s;
+}
+
+.tab:hover {
+  background: #d0d0d0;
+}
+
+.tab.active {
+  background: white;
+  border-bottom: 2px solid white;
+  margin-bottom: -2px;
+}
+
+.tab-content {
+  display: none;
+  flex: 1;
+  overflow: auto;
+}
+
+.tab-content.active {
+  display: block;
+}
+
 table { width: 100%; border-collapse: collapse; font-size: 11px; }
-th { background: #063856; color: white; padding: 8px; position: sticky; top: 0; z-index: 10; }
+th { background: #063856; color: white; padding: 8px; position: sticky; top: 0; z-index: 10; cursor: pointer; user-select: none; }
+th:hover { background: #084a6e; }
+th .filter-icon { float: right; font-size: 14px; }
 td { padding: 8px; border: 1px solid #ddd; text-align: center; }
 tr:hover { background: #f1f1f1; cursor: pointer; }
 
@@ -29,6 +68,218 @@ tr:hover { background: #f1f1f1; cursor: pointer; }
 
 .hidden { display: none !important; }
 .select-editor { width: 100%; padding: 2px; }
+
+/* Panel de control de capas */
+.layer-control {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: white;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  z-index: 100;
+  min-width: 250px;
+  max-width: 300px;
+}
+
+.layer-control-header {
+  padding: 12px 15px;
+  background: #063856;
+  color: white;
+  font-weight: bold;
+  border-radius: 4px 4px 0 0;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  user-select: none;
+}
+
+.layer-control-header:hover {
+  background: #084a6e;
+}
+
+.layer-control-content {
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+.layer-control-section {
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.layer-control-section:last-child {
+  border-bottom: none;
+}
+
+.layer-control-section-title {
+  padding: 10px 15px;
+  background: #f5f5f5;
+  font-weight: bold;
+  font-size: 12px;
+  color: #333;
+  text-transform: uppercase;
+}
+
+.layer-item {
+  padding: 10px 15px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.layer-item:hover {
+  background: #f9f9f9;
+}
+
+.layer-item input[type="checkbox"] {
+  cursor: pointer;
+  width: 16px;
+  height: 16px;
+}
+
+.layer-item label {
+  cursor: pointer;
+  flex: 1;
+  font-size: 13px;
+}
+
+.basemap-item {
+  padding: 8px 15px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: background 0.2s;
+  border-left: 3px solid transparent;
+}
+
+.basemap-item:hover {
+  background: #f9f9f9;
+}
+
+.basemap-item.active {
+  background: #e3f2fd;
+  border-left-color: #063856;
+}
+
+.basemap-item input[type="radio"] {
+  cursor: pointer;
+  width: 16px;
+  height: 16px;
+}
+
+.basemap-item label {
+  cursor: pointer;
+  flex: 1;
+  font-size: 13px;
+}
+
+.layer-control-toggle {
+  font-size: 18px;
+  transition: transform 0.3s;
+}
+
+.layer-control-toggle.collapsed {
+  transform: rotate(-90deg);
+}
+
+.opacity-control {
+  padding: 5px 15px 10px 15px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.opacity-control input[type="range"] {
+  flex: 1;
+  cursor: pointer;
+}
+
+.opacity-control span {
+  font-size: 11px;
+  color: #666;
+  min-width: 35px;
+}
+
+/* Estilos para el menú de opciones */
+.table-options {
+  position: absolute;
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  z-index: 1000;
+  min-width: 200px;
+}
+
+.table-options-item {
+  padding: 10px 15px;
+  cursor: pointer;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.table-options-item:hover {
+  background: #f5f5f5;
+}
+
+.table-options-item:last-child {
+  border-bottom: none;
+}
+
+/* Estilos para el filtro */
+.filter-input {
+  width: 90%;
+  padding: 4px;
+  margin: 5px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+}
+
+.filter-container {
+  position: absolute;
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  z-index: 1000;
+  padding: 10px;
+  min-width: 200px;
+}
+
+.filter-buttons {
+  display: flex;
+  gap: 5px;
+  margin-top: 10px;
+}
+
+.filter-buttons button {
+  flex: 1;
+  padding: 5px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  cursor: pointer;
+  background: white;
+}
+
+.filter-buttons button:hover {
+  background: #f0f0f0;
+}
+
+.filter-buttons .apply-btn {
+  background: #063856;
+  color: white;
+  border-color: #063856;
+}
+
+.filter-buttons .apply-btn:hover {
+  background: #084a6e;
+}
 </style>
 </head>
 
@@ -36,48 +287,203 @@ tr:hover { background: #f1f1f1; cursor: pointer; }
 
 <div id="contenedor">
   <div id="izquierda">
-    <div id="map"></div>
+    <div id="map">
+      <!-- Panel de control de capas -->
+      <div class="layer-control">
+        <div class="layer-control-header">
+          <span>Capas y Mapas Base</span>
+          <span class="layer-control-toggle collapsed">▼</span>
+        </div>
+        <div class="layer-control-content" style="display: none;">
+          <!-- Sección de Mapas Base -->
+          <div class="layer-control-section">
+            <div class="layer-control-section-title">Mapas Base</div>
+            <div class="basemap-item active" data-basemap="gray">
+              <input type="radio" name="basemap" id="basemap-gray" checked>
+              <label for="basemap-gray">Gris</label>
+            </div>
+            <div class="basemap-item" data-basemap="streets">
+              <input type="radio" name="basemap" id="basemap-streets">
+              <label for="basemap-streets">Calles</label>
+            </div>
+            <div class="basemap-item" data-basemap="topo">
+              <input type="radio" name="basemap" id="basemap-topo">
+              <label for="basemap-topo">Topográfico</label>
+            </div>
+            <div class="basemap-item" data-basemap="satellite">
+              <input type="radio" name="basemap" id="basemap-satellite">
+              <label for="basemap-satellite">Satélite</label>
+            </div>
+            <div class="basemap-item" data-basemap="hybrid">
+              <input type="radio" name="basemap" id="basemap-hybrid">
+              <label for="basemap-hybrid">Híbrido</label>
+            </div>
+            <div class="basemap-item" data-basemap="dark-gray">
+              <input type="radio" name="basemap" id="basemap-dark">
+              <label for="basemap-dark">Oscuro</label>
+            </div>
+            <div class="basemap-item" data-basemap="oceans">
+              <input type="radio" name="basemap" id="basemap-oceans">
+              <label for="basemap-oceans">Océanos</label>
+            </div>
+          </div>
+          
+          <!-- Sección de Capas -->
+          <div class="layer-control-section">
+            <div class="layer-control-section-title">Capas</div>
+            
+            <div class="layer-item">
+              <input type="checkbox" id="layer-malla" checked>
+              <label for="layer-malla">Malla Vial Contratista</label>
+            </div>
+            <div class="opacity-control" id="opacity-malla" style="display: none;">
+              <span>Opacidad:</span>
+              <input type="range" min="0" max="100" value="100">
+              <span class="opacity-value">100%</span>
+            </div>
+            
+            <div class="layer-item">
+              <input type="checkbox" id="layer-ciclorrutas-contratista" checked>
+              <label for="layer-ciclorrutas-contratista">Ciclorrutas Contratista</label>
+            </div>
+            <div class="opacity-control" id="opacity-ciclorrutas-contratista" style="display: none;">
+              <span>Opacidad:</span>
+              <input type="range" min="0" max="100" value="100">
+              <span class="opacity-value">100%</span>
+            </div>
+            
+            <div class="layer-item">
+              <input type="checkbox" id="layer-calzada" checked>
+              <label for="layer-calzada">Calzada 2026</label>
+            </div>
+            <div class="opacity-control" id="opacity-calzada" style="display: none;">
+              <span>Opacidad:</span>
+              <input type="range" min="0" max="100" value="100">
+              <span class="opacity-value">100%</span>
+            </div>
+            
+            <div class="layer-item">
+              <input type="checkbox" id="layer-ciclorrutas" checked>
+              <label for="layer-ciclorrutas">Ciclorrutas</label>
+            </div>
+            <div class="opacity-control" id="opacity-ciclorrutas" style="display: none;">
+              <span>Opacidad:</span>
+              <input type="range" min="0" max="100" value="100">
+              <span class="opacity-value">100%</span>
+            </div>
+            
+            <div class="layer-item">
+              <input type="checkbox" id="layer-unidad" checked>
+              <label for="layer-unidad">Unidad de Muestra</label>
+            </div>
+            <div class="opacity-control" id="opacity-unidad" style="display: none;">
+              <span>Opacidad:</span>
+              <input type="range" min="0" max="100" value="100">
+              <span class="opacity-value">100%</span>
+            </div>
+            
+            <div class="layer-item">
+              <input type="checkbox" id="layer-fallas" checked>
+              <label for="layer-fallas">Fallas Malla Vial</label>
+            </div>
+            <div class="opacity-control" id="opacity-fallas" style="display: none;">
+              <span>Opacidad:</span>
+              <input type="range" min="0" max="100" value="100">
+              <span class="opacity-value">100%</span>
+            </div>
+            
+            <div class="layer-item">
+              <input type="checkbox" id="layer-fallas-ciclorrutas" checked>
+              <label for="layer-fallas-ciclorrutas">Fallas Ciclorrutas</label>
+            </div>
+            <div class="opacity-control" id="opacity-fallas-ciclorrutas" style="display: none;">
+              <span>Opacidad:</span>
+              <input type="range" min="0" max="100" value="100">
+              <span class="opacity-value">100%</span>
+            </div>
+           
+          </div>
+        </div>
+      </div>
+    </div>
     <div id="tablaContainer">
-      <table id="tablaMalla">
-        <thead>
-          <tr>
-            <th>Fecha de Captura</th>
-            <th>PK ID Calzada</th>
-            <th>Ancho de Calzada</th>
-            <th>área de Calzada</th>
-            <th>Longitud de Calzada</th>
-            <th>PK ID Unidad Muestra</th>
-            <th>área de unidad muestra</th>
-            <th>Longitud de unidad muestra</th>
-            <th>Ancho de unidad muestra</th>
-            <th>Tipo de Diagnóstico</th>
-            <th>Fecha de Intervención</th>
-            <th>Tipo de Intervención</th>
-            <th>área de intervención</th>
-            <th>Inversión</th>
-            <th>Metodología de Inspección</th>
-            <th>Tipo de Superficie</th>
-            <th>Número de losas</th>
-            <th>PCI Calzada</th>
-            <th>PCI Unidad de Muestra</th>
-            <th>Observaciones</th>
-            <th>Visto Bueno</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
+      <!-- Pestañas -->
+      <div class="tabs">
+        <button class="tab active" data-tab="malla-vial">Malla Vial</button>
+        <button class="tab" data-tab="ciclorrutas">Ciclorrutas</button>
+      </div>
+      
+      <!-- Contenido Malla Vial -->
+      <div id="malla-vial" class="tab-content active">
+        <table id="tablaMalla">
+          <thead>
+            <tr>
+              <th data-column="Fecha_Captura">Fecha de Captura <span class="filter-icon">⋮</span></th>
+              <th data-column="PK_ID_CALZ">PK ID Calzada <span class="filter-icon">⋮</span></th>
+              <th data-column="ANC_CALZ">Ancho de Calzada <span class="filter-icon">⋮</span></th>
+              <th data-column="AREA_CALZ">área de Calzada <span class="filter-icon">⋮</span></th>
+              <th data-column="LONG_CALZ">Longitud de Calzada <span class="filter-icon">⋮</span></th>
+              <th data-column="PK_UM">PK ID Unidad Muestra <span class="filter-icon">⋮</span></th>
+              <th data-column="AR_UM">área de unidad muestra <span class="filter-icon">⋮</span></th>
+              <th data-column="LG_UM">Longitud de unidad muestra <span class="filter-icon">⋮</span></th>
+              <th data-column="ANCH_UM">Ancho de unidad muestra <span class="filter-icon">⋮</span></th>
+              <th data-column="PRE_DIAGNOSTICO">Tipo de Diagnóstico <span class="filter-icon">⋮</span></th>
+              <th data-column="Fecha_Intervencion">Fecha de Intervención <span class="filter-icon">⋮</span></th>
+              <th data-column="Tipo_intervencion">Tipo de Intervención <span class="filter-icon">⋮</span></th>
+              <th data-column="area_intervencion">área de intervención <span class="filter-icon">⋮</span></th>
+              <th data-column="inversion">Inversión <span class="filter-icon">⋮</span></th>
+              <th data-column="ME_INSP">Metodología de Inspección <span class="filter-icon">⋮</span></th>
+              <th data-column="superficie">Tipo de Superficie <span class="filter-icon">⋮</span></th>
+              <th data-column="NUM_LOSAS">Número de losas <span class="filter-icon">⋮</span></th>
+              <th data-column="PCI_CALZ">PCI Calzada <span class="filter-icon">⋮</span></th>
+              <th data-column="PCI_UM">PCI Unidad de Muestra <span class="filter-icon">⋮</span></th>
+              <th data-column="Observaiones">Observaciones <span class="filter-icon">⋮</span></th>
+              <th data-column="Validacion_Interventoria">Visto Bueno <span class="filter-icon">⋮</span></th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      
+      <!-- Contenido Ciclorrutas -->
+      <div id="ciclorrutas" class="tab-content">
+        <table id="tablaCiclorrutas">
+          <thead>
+            <tr>
+              <th data-column="Fecha_Captura">Fecha de Captura <span class="filter-icon">⋮</span></th>
+              <th data-column="PK_ID_CICLO">PK ID Ciclorruta <span class="filter-icon">⋮</span></th>
+              <th data-column="ANC_CICLO">Ancho de Ciclorruta <span class="filter-icon">⋮</span></th>
+              <th data-column="PK_UM">PK ID Unidad Muestra <span class="filter-icon">⋮</span></th>
+              <th data-column="AR_UM">Área de unidad muestra <span class="filter-icon">⋮</span></th>
+              <th data-column="LG_UM">Longitud de unidad muestra <span class="filter-icon">⋮</span></th>
+              <th data-column="ANCH_UM">Ancho de unidad muestra <span class="filter-icon">⋮</span></th>
+              <th data-column="PRE_DIAGNOSTICO">Tipo de Diagnóstico <span class="filter-icon">⋮</span></th>
+              <th data-column="Fecha_Intervencion">Fecha de Intervención <span class="filter-icon">⋮</span></th>
+              <th data-column="Tipo_intervencion">Tipo de Intervención <span class="filter-icon">⋮</span></th>
+              <th data-column="area_intervencion">Área de intervención <span class="filter-icon">⋮</span></th>
+              <th data-column="inversion">Inversión <span class="filter-icon">⋮</span></th>
+              <th data-column="PCI_CICLO">PCI Ciclorruta <span class="filter-icon">⋮</span></th>
+              <th data-column="PCI_UM">PCI Unidad de Muestra <span class="filter-icon">⋮</span></th>
+              <th data-column="Observaciones">Observaciones <span class="filter-icon">⋮</span></th>
+              <th data-column="Validacion_Interventoria">Visto Bueno <span class="filter-icon">⋮</span></th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
     </div>
   </div>
 
   <div id="derecha">
     <div id="panelFallas">
-      <h3>Fallas</h3>
+      <h3 id="tituloFallas">Fallas</h3>
       <table id="tablaFallas">
         <thead>
           <tr>
-            <th>PK Calzada</th>
-            <th>Superficie</th>
-            <th>Falla</th>
+            <th id="headerPK">PK</th>
+            <th>PK Unidad de Muestra</th>
+            <th>Tipo de Falla</th>
+            <th>Severidad</th>
           </tr>
         </thead>
         <tbody></tbody>
@@ -85,7 +491,7 @@ tr:hover { background: #f1f1f1; cursor: pointer; }
     </div>
     <div id="panelFotos">
       <h3>Fotos</h3>
-      <em>Seleccione una malla para ver fotos</em>
+      <em>Seleccione un elemento para ver fotos</em>
     </div>
   </div>
 </div>
@@ -96,8 +502,13 @@ require([
   "esri/layers/FeatureLayer",
   "esri/IdentityManager",
   "esri/graphic",
+  "esri/InfoTemplate",
+  "esri/layers/LabelClass",
+  "esri/symbols/TextSymbol",
+  "esri/symbols/Font",
+  "dojo/_base/Color",
   "dojo/domReady!"
-], function (Map, FeatureLayer, esriId, Graphic) {
+], function (Map, FeatureLayer, esriId, Graphic, InfoTemplate, LabelClass, TextSymbol, Font, Color) {
 
   esriId.registerOAuthInfos([{
     appId: "IB1rEgaJRGpotuGY",
@@ -109,39 +520,130 @@ require([
 
   function iniciarApp() {
     const usuario = esriId.credentials[0].userId;
-    const map = new Map("map", { basemap: "gray", center: [-74.1, 4.65], zoom: 11 });
+    const map = new Map("map", { basemap: "gray", center: [-74.1, 4.65], zoom: 11, showLabels: true });
 
+    // ========== CAPAS DE MALLA VIAL ==========
     const mallaLayer = new FeatureLayer(
       "https://services3.arcgis.com/7Be6bWZhk16f3JwA/arcgis/rest/services/Malla_Vial_Contratista_2026_view/FeatureServer/0",
       { outFields: ["*"], mode: FeatureLayer.MODE_ONDEMAND, definitionExpression: "Interventor = '" + usuario + "'" }
     );
+    
+    const fallasLayer = new FeatureLayer(
+      "https://services3.arcgis.com/7Be6bWZhk16f3JwA/arcgis/rest/services/Malla_Vial_Contratista_2026_view/FeatureServer/1",
+      { outFields: ["*"], definitionExpression: "Interventor = '" + usuario + "'" }
+    );
+    
+    // ========== CAPAS DE CICLORRUTAS ==========
+    const CiclorrutasContratista = new FeatureLayer(
+      "https://services3.arcgis.com/7Be6bWZhk16f3JwA/arcgis/rest/services/Ciclorrutas_Contratista_2026_view/FeatureServer/0",
+      { outFields: ["*"], mode: FeatureLayer.MODE_ONDEMAND, definitionExpression: "Interventor = '" + usuario + "'" }
+    );
+    
+    const fallasCiclorrutas = new FeatureLayer(
+      "https://services3.arcgis.com/7Be6bWZhk16f3JwA/arcgis/rest/services/Ciclorrutas_Contratista_2026_view/FeatureServer/1",
+      { outFields: ["*"], definitionExpression: "Interventor = '" + usuario + "'" }
+    );
+    
     const malla2026 = new FeatureLayer(
         "https://services3.arcgis.com/7Be6bWZhk16f3JwA/arcgis/rest/services/Calzada_2026/FeatureServer/0",
-        {
-          outFields: ["*"],
-          mode: FeatureLayer.MODE_ONDEMAND
-        }
+        { outFields: ["*"], mode: FeatureLayer.MODE_ONDEMAND }
       );
 
-      const symbolMalla = new esri.symbol.SimpleFillSymbol(
+    const symbolMalla = new esri.symbol.SimpleFillSymbol(
         esri.symbol.SimpleFillSymbol.STYLE_SOLID,
         new esri.symbol.SimpleLineSymbol(
           esri.symbol.SimpleLineSymbol.STYLE_SOLID,
-          new esri.Color([0, 0, 0, 1]),
-          2.93
+          new esri.Color([0, 112, 255, 1]),
+          2
         ),
-        new esri.Color([185, 186, 184, 0.5])
+        new esri.Color([0, 112, 255, 0.3])
       );
 
       const rendererMalla = new esri.renderer.SimpleRenderer(symbolMalla);
       malla2026.setRenderer(rendererMalla);
+      
+      const popupTemplate = new esri.InfoTemplate(
+        "Información de Calzada",
+        "<b>CIV:</b> ${CIV}<br>" +
+        "<b>PK ID Calzada:</b> ${PK_ID_CALZADA}<br>" +
+        "<b>Ancho Calzada:</b> ${ANCHOCALZADA} m<br>" +
+        "<b>Longitud Calzada:</b> ${LOGITUDHORIZONTAL} m<br>" +
+        "<b>Área Calzada:</b> ${AREACALZADA} m²<br>" +
+        "<b>Tipo de Superficie:</b> ${TIPOSUPERFICIE}<br>"
+      );
+      
+      malla2026.setInfoTemplate(popupTemplate);
+      
+      const labelFont = new Font("8pt", Font.STYLE_NORMAL, Font.VARIANT_NORMAL, "Arial");
+      const labelSymbol = new TextSymbol();
+      labelSymbol.setColor(new Color([18, 18, 18, 1]));
+      labelSymbol.setFont(labelFont);
+      labelSymbol.setHaloColor(new Color([74, 67, 67, 1]));
+      labelSymbol.setHaloSize(1);
+      
+      const labelClass = new LabelClass({
+        labelExpressionInfo: { value: "Calzada: "+"{PK_ID_CALZADA}" },
+        useCodedValues: true,
+        symbol: labelSymbol,
+        minScale: 2000,
+        maxScale: 0
+      });
+      
+      malla2026.setLabelingInfo([labelClass]);
+      malla2026.setScaleRange(50000, 0);
+      
+    const Ciclorruta = new FeatureLayer(
+      "https://services3.arcgis.com/7Be6bWZhk16f3JwA/arcgis/rest/services/Ciclorruta_2026/FeatureServer/0",
+      { outFields: ["*"], mode: FeatureLayer.MODE_ONDEMAND}
+    );
+    
+      const symbolMallaCR = new esri.symbol.SimpleFillSymbol(
+        esri.symbol.SimpleFillSymbol.STYLE_SOLID,
+        new esri.symbol.SimpleLineSymbol(
+          esri.symbol.SimpleLineSymbol.STYLE_SOLID,
+          new esri.Color([52, 52, 52, 1]),
+          2.93
+        ),
+        new esri.Color([242, 61, 0, 0.6])
+      );
 
-      // Visible solo a escalas cercanas (tipo Streets)
-      malla2026.setScaleRange(10000, 0);
+      const rendererCR = new esri.renderer.SimpleRenderer(symbolMallaCR);
+      Ciclorruta.setRenderer(rendererCR);
+      Ciclorruta.setScaleRange(5000, 0);
+
+      const popupTemplateCR = new esri.InfoTemplate(
+        "Información de Ciclorruta",
+        "<b>CIV:</b> ${CIV}<br>" +
+        "<b>PK ID Ciclorruta:</b> ${PK_ID_CICLORRUTA}<br>" +
+        "<b>Ancho Calzada:</b> ${ANCHOCICLORRUTA} m<br>" +
+        "<b>Longitud Calzada:</b> ${LONGITUDHORIZONTAL} m<br>" +
+        "<b>Área Calzada:</b> ${AREACICLORRUTA} m²<br>"
+      );
+      
+      Ciclorruta.setInfoTemplate(popupTemplateCR);
+      
+      const labelFontCR = new Font("7pt", Font.STYLE_NORMAL, Font.VARIANT_NORMAL, "Arial");
+      const labelSymbolCR = new TextSymbol();
+      labelSymbolCR.setColor(new Color([242, 61, 0, 1]));
+      labelSymbolCR.setFont(labelFontCR);
+      labelSymbolCR.setHaloColor(new Color([255, 255, 255, 1]));
+      labelSymbolCR.setHaloSize(1);
+      
+      const labelClassCR = new LabelClass({
+        labelExpressionInfo: { value: "PK_CR:"+"{PK_ID_CICLORRUTA}" },
+        useCodedValues: true,
+        symbol: labelSymbolCR,
+        minScale: 2000,
+        maxScale: 0
+      });
+      
+    Ciclorruta.setLabelingInfo([labelClassCR]);
+    
     const UnidadMuestra = new FeatureLayer(
       "https://services3.arcgis.com/7Be6bWZhk16f3JwA/arcgis/rest/services/UnidaddeMuestraMV2026/FeatureServer/0",
       { outFields: ["*"], mode: FeatureLayer.MODE_ONDEMAND}
     );
+    
     const symbolMallaUM = new esri.symbol.SimpleFillSymbol(
         esri.symbol.SimpleFillSymbol.STYLE_SOLID,
         new esri.symbol.SimpleLineSymbol(
@@ -154,65 +656,63 @@ require([
 
       const rendererUM = new esri.renderer.SimpleRenderer(symbolMallaUM);
       UnidadMuestra.setRenderer(rendererUM);
-
-      // Visible solo a escalas cercanas (tipo Streets)
       UnidadMuestra.setScaleRange(10000, 0);
 
-    const fallasLayer = new FeatureLayer(
-      "https://services3.arcgis.com/7Be6bWZhk16f3JwA/arcgis/rest/services/Malla_Vial_Contratista_2026_view/FeatureServer/1",
-      { outFields: ["*"], definitionExpression: "Interventor = '" + usuario + "'" }
-    );
-    const labelCalzada = new esri.layers.LabelClass({
-      labelExpressionInfo: {
-        value: "{PK_ID_CALZADA}"
-      },
-      symbol: new esri.symbol.TextSymbol(
-        "{PK_ID_CALZADA}"
-      ).setColor(new esri.Color([0, 0, 0, 1]))
-      .setFont(new esri.symbol.Font(
-        "9pt",
-        esri.symbol.Font.STYLE_NORMAL,
-        esri.symbol.Font.VARIANT_NORMAL,
-        esri.symbol.Font.WEIGHT_BOLD,
-        "Arial"
-      )),
-      minScale: 10000,
-      maxScale: 0
-    });
-
-    malla2026.setLabelingInfo([labelCalzada]);
-    malla2026.showLabels = true;
-    const labelUM = new esri.layers.LabelClass({
-    labelExpressionInfo: {
-      value: "{PK_ID_UNIDADMUESTREO}"
-    },
-    symbol: new esri.symbol.TextSymbol()
-      .setColor(new esri.Color([0, 120, 0, 1]))
-      .setFont(new esri.symbol.Font(
-        "9pt",
-        esri.symbol.Font.STYLE_NORMAL,
-        esri.symbol.Font.VARIANT_NORMAL,
-        esri.symbol.Font.WEIGHT_BOLD,
-        "Arial"
-      )),
-    minScale: 10000,
-    maxScale: 0
-  });
-
-  UnidadMuestra.setLabelingInfo([labelUM]);
-  UnidadMuestra.showLabels = true;
+      const popupTemplateUM = new esri.InfoTemplate(
+        "Información de Unidad de Muestra",
+        "<b>CIV:</b> ${CIV}<br>" +
+        "<b>PK ID Unidad Muestra:</b> ${PK_ID_UNIDADMUESTREO}<br>" +
+        "<b>Ancho Calzada:</b> ${ANCHOUM} m<br>" +
+        "<b>Longitud Calzada:</b> ${LOGITUDUM} m<br>" +
+        "<b>Área Calzada:</b> ${AREAUM} m²<br>" +
+        "<b>Tipo de Superficie:</b> ${TIPOSUPERFICIE_UM}<br>"
+      );
+      
+      UnidadMuestra.setInfoTemplate(popupTemplateUM);
+      
+      const labelFontUM = new Font("7pt", Font.STYLE_NORMAL, Font.VARIANT_NORMAL, "Arial");
+      const labelSymbolUM = new TextSymbol();
+      labelSymbolUM.setColor(new Color([66, 220, 4, 1]));
+      labelSymbolUM.setFont(labelFontUM);
+      labelSymbolUM.setHaloColor(new Color([74, 67, 67, 1]));
+      labelSymbolUM.setHaloSize(1);
+      
+      const labelClassUM = new LabelClass({
+        labelExpressionInfo: { value: "PK_UM:"+"{PK_ID_UNIDADMUESTREO}" },
+        useCodedValues: true,
+        symbol: labelSymbolUM,
+        minScale: 2000,
+        maxScale: 0
+      });
+      
+      UnidadMuestra.setLabelingInfo([labelClassUM]);
 
     const highlightLayer = new esri.layers.GraphicsLayer();
-    map.addLayers([UnidadMuestra, malla2026, mallaLayer, fallasLayer, highlightLayer ]);
-
+    map.addLayers([UnidadMuestra, Ciclorruta, malla2026, mallaLayer, CiclorrutasContratista, fallasLayer, fallasCiclorrutas, highlightLayer]);
+    map.reorderLayer(highlightLayer, map.layerIds.length - 1);
     let tablaCargadaTotal = false;
+    let tablaCiclórrutasCargada = false;
+    let todosLosRegistros = [];
+    let todosLosRegistrosCiclorrutas = [];
+    let filtrosActivos = {};
+    let filtrosActivosCiclorrutas = {};
+    let tipoActual = 'malla'; // 'malla' o 'ciclorrutas'
+    
     mallaLayer.on("update-end", function() {
       if (!tablaCargadaTotal) {
         cargarTablaMalla();
         tablaCargadaTotal = true;
       }
     });
+    
+    CiclorrutasContratista.on("update-end", function() {
+      if (!tablaCiclórrutasCargada) {
+        cargarTablaCiclorrutas();
+        tablaCiclórrutasCargada = true;
+      }
+    });
 
+    // ========== FUNCIONES PARA MALLA VIAL ==========
     function cargarTablaMalla() {
       const tbody = document.querySelector("#tablaMalla tbody");
       tbody.innerHTML = "";
@@ -223,6 +723,8 @@ require([
       query.returnGeometry = true;
 
       mallaLayer.queryFeatures(query).then(function (res) {
+        todosLosRegistros = res.features;
+        
         res.features.forEach(function (g) {
           const tr = document.createElement("tr");
           const valActual = g.attributes.Validacion_Interventoria || "Pendiente";
@@ -234,7 +736,6 @@ require([
             else if (valor === "No Aprobado") celda.classList.add("estado-no-aprobado");
             else celda.classList.add("estado-pendiente");
           }
-          console.log(g.attributes);
 
           tr.innerHTML = `
             <td>${formatearFechaDMY(g.attributes.Fecha_Captura) || ""}</td>
@@ -273,7 +774,6 @@ require([
           const label = tdEdit.querySelector(".label-visto");
           const select = tdEdit.querySelector(".select-editor");
 
-          // DOBLE CLIC PARA ABRIR EL SELECT
           tdEdit.ondblclick = function(e) {
             e.stopPropagation();
             label.classList.add("hidden");
@@ -281,21 +781,16 @@ require([
             select.focus();
           };
 
-          // EVENTO DE CAMBIO (UPDATE)
           select.onchange = function(e) {
             const nuevoValor = select.value;
-
-            // 1. Actualización Visual Inmediata (Feedback al usuario)
             label.innerText = nuevoValor;
             aplicarEstiloCelda(tdEdit, nuevoValor);
             
-            // 2. Preparar objeto para ArcGIS
             const editGraphic = new Graphic();
             editGraphic.attributes = {};
             editGraphic.attributes[mallaLayer.objectIdField] = oid;
             editGraphic.attributes["Validacion_Interventoria"] = nuevoValor;
 
-            // 3. Enviar a base de datos
             mallaLayer.applyEdits(null, [editGraphic], null).then(function(res) {
               if (res[0].success) {
                 console.log("Servidor actualizado");
@@ -303,13 +798,10 @@ require([
               }
             });
 
-            // 4. Salir del modo edición
             finalizar();
           };
 
-          // SI EL USUARIO HACE CLIC FUERA SIN CAMBIAR NADA
           select.onblur = function() {
-            // Un pequeño delay para permitir que el onchange ocurra primero si se seleccionó algo
             setTimeout(finalizar, 150);
           };
 
@@ -319,51 +811,264 @@ require([
           }
 
           tr.onclick = function () {
-            highlightLayer.clear();
-            if (g.geometry) {
+            resaltarCalzadaPorPK(g.attributes.PK_ID_CALZ);
+            if (g.geometry) {              
               if (g.geometry.type === "point") map.centerAndZoom(g.geometry, 17);
               else map.setExtent(g.geometry.getExtent().expand(1.5), true);
             }
-            fallasLayer.setDefinitionExpression("pk_id_calzada = '" + g.attributes.PK_ID_CALZ + "'");
-            cargarFotosFalla(oid);
+            mostrarFallas(
+              fallasLayer,
+              "pk_id_calzada = '" + g.attributes.PK_ID_CALZ + "'",
+              "pk_id_calzada"
+            );
+
+            document.getElementById('tituloFallas').innerText = 'Fallas - Malla Vial';
+            document.getElementById('headerPK').innerText = 'PK Calzada';
+            cargarFotosFalla(oid, mallaLayer);
+
           };
 
           tbody.appendChild(tr);
         });
       });
     }
+    function resaltarCalzadaPorPK(pkCalzada) {
+      highlightLayer.clear();
+
+      const query = new esri.tasks.Query();
+      query.where = "PK_ID_CALZADA = '" + pkCalzada + "'";
+      query.returnGeometry = true;
+      query.outFields = ["PK_ID_CALZADA"];
+
+      malla2026.queryFeatures(query).then(function (res) {
+
+        console.log("Resultado calzada:", res.features.length);
+
+        if (!res.features.length) {
+          console.warn("No se encontró calzada:", pkCalzada);
+          return;
+        }
+
+        const g = res.features[0];
+
+        let symbol = new esri.symbol.SimpleLineSymbol(
+          esri.symbol.SimpleLineSymbol.STYLE_SOLID,
+          new esri.Color([255, 0, 0, 1]),
+          6
+        );
+
+
+        highlightLayer.add(new esri.Graphic(g.geometry, symbol));
+
+        if (g.geometry.getExtent) {
+          map.setExtent(g.geometry.getExtent().expand(1.5), true);
+        }
+      });
+    }
+    function resaltarCiclorrutaPorPK(pkCiclorruta) {
+      highlightLayer.clear();
+
+      const query = new esri.tasks.Query();
+      query.where = "PK_ID_CICLORRUTA = '" + pkCiclorruta + "'";
+      query.returnGeometry = true;
+      query.outFields = ["PK_ID_CICLORRUTA"];
+
+      Ciclorruta.queryFeatures(query).then(function (res) {
+
+        console.log("Resultado ciclorruta:", res.features.length);
+
+        if (!res.features.length) {
+          console.warn("No se encontró ciclorruta:", pkCiclorruta);
+          return;
+        }
+
+        const g = res.features[0];
+
+        let symbol = new esri.symbol.SimpleLineSymbol(
+          esri.symbol.SimpleLineSymbol.STYLE_SOLID,
+          new esri.Color([255, 0, 0, 1]),
+          6
+        );
+
+
+        highlightLayer.add(new esri.Graphic(g.geometry, symbol));
+
+        if (g.geometry.getExtent) {
+          map.setExtent(g.geometry.getExtent().expand(1.5), true);
+        }
+      });
+    }
+    // ========== FUNCIONES PARA CICLORRUTAS ==========
+    function cargarTablaCiclorrutas() {
+      const tbody = document.querySelector("#tablaCiclorrutas tbody");
+      tbody.innerHTML = "";
+
+      const query = new esri.tasks.Query();
+      query.where = "Interventor = '" + usuario + "'";
+      query.outFields = ["*"];
+      query.returnGeometry = true;
+
+      CiclorrutasContratista.queryFeatures(query).then(function (res) {
+        todosLosRegistrosCiclorrutas = res.features;
+        
+        res.features.forEach(function (g) {
+          const tr = document.createElement("tr");
+          const valActual = g.attributes.Validacion_Interventoria || "Pendiente";
+          const oid = g.attributes.objectid || g.attributes.OBJECTID;
+
+          function aplicarEstiloCelda(celda, valor) {
+            celda.classList.remove("estado-aprobado", "estado-no-aprobado", "estado-pendiente");
+            if (valor === "Aprobado") celda.classList.add("estado-aprobado");
+            else if (valor === "No Aprobado") celda.classList.add("estado-no-aprobado");
+            else celda.classList.add("estado-pendiente");
+          }
+
+          tr.innerHTML = `
+            <td>${formatearFechaDMY(g.attributes.Fecha_Captura) || ""}</td>
+            <td>${g.attributes.PK_ID_CICLO || ""}</td>
+            <td>${g.attributes.ANC_CICLO || ""}</td>
+            <td>${g.attributes.PK_UM || ""}</td>
+            <td>${g.attributes.AR_UM || ""}</td>
+            <td>${g.attributes.LG_UM || ""}</td>
+            <td>${g.attributes.ANCH_UM || ""}</td>
+            <td>${g.attributes.PRE_DIAGNOSTICO || ""}</td>
+            <td>${g.attributes.Fecha_Intervencion || ""}</td>
+            <td>${g.attributes.Tipo_intervencion || ""}</td>
+            <td>${g.attributes.area_intervencion || ""}</td>
+            <td>${g.attributes.inversion || ""}</td>
+            <td>${g.attributes.PCI_CICLO || ""}</td>
+            <td>${g.attributes.PCI_UM || ""}</td>
+            <td>${g.attributes.Observaciones || ""}</td>           
+            <td class="celda-editable" title="Doble clic para editar">
+              <span class="label-visto">${valActual}</span>
+              <select class="select-editor hidden">
+                <option value="Pendiente" ${valActual === "Pendiente" ? "selected" : ""}>Pendiente</option>
+                <option value="Aprobado" ${valActual === "Aprobado" ? "selected" : ""}>Aprobado</option>
+                <option value="No Aprobado" ${valActual === "No Aprobado" ? "selected" : ""}>No Aprobado</option>
+              </select>
+            </td>
+          `;
+
+          const tdEdit = tr.querySelector(".celda-editable");
+          aplicarEstiloCelda(tdEdit, valActual);
+          
+          const label = tdEdit.querySelector(".label-visto");
+          const select = tdEdit.querySelector(".select-editor");
+
+          tdEdit.ondblclick = function(e) {
+            e.stopPropagation();
+            label.classList.add("hidden");
+            select.classList.remove("hidden");
+            select.focus();
+          };
+
+          select.onchange = function(e) {
+            const nuevoValor = select.value;
+            label.innerText = nuevoValor;
+            aplicarEstiloCelda(tdEdit, nuevoValor);
+            
+            const editGraphic = new Graphic();
+            editGraphic.attributes = {};
+            editGraphic.attributes[CiclorrutasContratista.objectIdField] = oid;
+            editGraphic.attributes["Validacion_Interventoria"] = nuevoValor;
+
+            CiclorrutasContratista.applyEdits(null, [editGraphic], null).then(function(res) {
+              if (res[0].success) {
+                console.log("Servidor actualizado");
+                g.attributes["Validacion_Interventoria"] = nuevoValor;
+              }
+            });
+
+            finalizar();
+          };
+
+          select.onblur = function() {
+            setTimeout(finalizar, 150);
+          };
+
+          function finalizar() {
+            select.classList.add("hidden");
+            label.classList.remove("hidden");
+          }
+
+          tr.onclick = function () {
+            console.log("Clic en fila:", g.attributes);
+            resaltarCiclorrutaPorPK(g.attributes.PK_ID_CICLO);
+            if (g.geometry) {
+              if (g.geometry.type === "point") map.centerAndZoom(g.geometry, 17);
+              else map.setExtent(g.geometry.getExtent().expand(1.5), true);
+            }
+            mostrarFallas(
+  fallasCiclorrutas,
+  "pk_id_ciclorruta = '" + g.attributes.PK_ID_CICLO + "'",
+  "pk_id_ciclorruta"
+);
+
+            document.getElementById('tituloFallas').innerText = 'Fallas - Ciclorrutas';
+            document.getElementById('headerPK').innerText = 'PK Ciclorruta';
+            cargarFotosFalla(oid, CiclorrutasContratista);
+          };
+
+          tbody.appendChild(tr);
+        });
+      });
+    }
+    
     function formatearFechaDMY(valorFecha) {
       if (!valorFecha) return "";
-
       const fecha = new Date(valorFecha);
-
       const dia = String(fecha.getDate()).padStart(2, "0");
       const mes = String(fecha.getMonth() + 1).padStart(2, "0");
       const anio = fecha.getFullYear();
-
       return `${dia}/${mes}/${anio}`;
     }
-    function mostrarFallas(layer) {
-      layer.on("update-end", function () {
-        const tbody = document.querySelector("#tablaFallas tbody");
-        tbody.innerHTML = "";
-        layer.graphics.forEach(function (g) {
-          const tr = document.createElement("tr");
-          tr.innerHTML = `<td>${g.attributes.pk_id_calzada}</td><td>${g.attributes.tipo_superficie}</td><td>${g.attributes.tipo_falla}</td>`;
-          tr.onclick = function () {
-            if (g.geometry) {
-              if (g.geometry.type === "point") map.centerAndZoom(g.geometry, 17);
-              else map.setExtent(g.geometry.getExtent().expand(1.5), true);
-              resaltarPunto(g.geometry);
-            }
-          };
-          tbody.appendChild(tr);
-        });
-      });
+    
+    function mostrarFallas(layer, where, pkField) {
+  const tbody = document.querySelector("#tablaFallas tbody");
+  tbody.innerHTML = "<tr><td colspan='3'>Cargando...</td></tr>";
+
+  const query = new esri.tasks.Query();
+  query.where = where;
+  query.outFields = ["*"];
+  query.returnGeometry = true;
+
+  layer.queryFeatures(query).then(function (res) {
+    tbody.innerHTML = "";
+
+    if (!res.features.length) {
+      tbody.innerHTML = "<tr><td colspan='3'>Sin fallas</td></tr>";
+      return;
     }
+
+    res.features.forEach(function (g) {
+      const tr = document.createElement("tr");
+      console.log("Falla:", g.attributes);
+      tr.innerHTML = `
+        <td>${g.attributes[pkField] || ""}</td>
+        <td>${g.attributes.pk_id_um || ""}</td>
+        <td>${g.attributes.tipo_falla || ""}</td>
+        <td>${g.attributes.severidad || ""}</td>
+      `;
+
+      tr.onclick = function () {
+        if (g.geometry) {
+          if (g.geometry.type === "point") {
+            map.centerAndZoom(g.geometry, 18);
+          } else {
+            map.setExtent(g.geometry.getExtent().expand(1.5), true);
+          }
+          resaltarPunto(g.geometry);
+        }
+      };
+
+      tbody.appendChild(tr);
+    });
+  });
+}
+
+    
     function resaltarPunto(geometry) {
       highlightLayer.clear();
-
       const symbol = new esri.symbol.SimpleMarkerSymbol(
         esri.symbol.SimpleMarkerSymbol.STYLE_CIRCLE,
         18,
@@ -374,16 +1079,14 @@ require([
         ),
         new esri.Color([255, 255, 0, 0.7])
       );
-
       const graphic = new esri.Graphic(geometry, symbol);
       highlightLayer.add(graphic);
     }
 
-    function cargarFotosFalla(objectid) {
-      highlightLayer.clear();
+    function cargarFotosFalla(objectid, layer) {
       const panel = document.getElementById("panelFotos");
       panel.innerHTML = "<em>Cargando fotos...</em>";
-      mallaLayer.queryAttachmentInfos(objectid).then(function (attachments) {
+      layer.queryAttachmentInfos(objectid).then(function (attachments) {
         panel.innerHTML = "<h3>Fotos</h3>";
         if (!attachments.length) { panel.innerHTML += "Sin fotos"; return; }
         attachments.forEach(function (att) {
@@ -393,7 +1096,370 @@ require([
         });
       });
     }
-    mostrarFallas(fallasLayer);
+    
+    mostrarFallas(fallasLayer, 'pk_id_calzada');
+    mostrarFallas(fallasCiclorrutas, 'pk_id_ciclorruta');
+    
+    // ========== SISTEMA DE PESTAÑAS ==========
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.onclick = function() {
+        const tabId = this.dataset.tab;
+        
+        // Cambiar pestañas activas
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        this.classList.add('active');
+        
+        // Cambiar contenido activo
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+        
+        // Actualizar tipo actual
+        tipoActual = tabId === 'malla-vial' ? 'malla' : 'ciclorrutas';
+        
+        // Limpiar panel de fallas
+        document.querySelector("#tablaFallas tbody").innerHTML = "";
+        document.getElementById("panelFotos").innerHTML = "<h3>Fotos</h3><em>Seleccione un elemento para ver fotos</em>";
+      };
+    });
+    
+    // ============= FUNCIONALIDAD DE FILTROS Y OPCIONES =============
+    
+    function mostrarMenuOpciones(th, event) {
+      event.stopPropagation();
+      const menuExistente = document.querySelector('.table-options');
+      if (menuExistente) menuExistente.remove();
+      
+      const menu = document.createElement('div');
+      menu.className = 'table-options';
+      menu.style.left = event.pageX + 'px';
+      menu.style.top = event.pageY + 'px';
+      
+      const columna = th.dataset.column;
+      const nombreColumna = th.textContent.replace('⋮', '').trim();
+      
+      menu.innerHTML = `
+        <div class="table-options-item" data-action="filter">🔍 Filtrar</div>
+        <div class="table-options-item" data-action="stats">📊 Estadísticas</div>
+        <div class="table-options-item" data-action="zoom">🔎 Hacer zoom</div>
+        <div class="table-options-item" data-action="pan">🗺️ Desplazar a</div>
+        <div class="table-options-item" data-action="export">📥 Exportar</div>
+      `;
+      
+      document.body.appendChild(menu);
+      
+      menu.querySelectorAll('.table-options-item').forEach(item => {
+        item.onclick = function() {
+          const action = this.dataset.action;
+          menu.remove();
+          
+          switch(action) {
+            case 'filter': mostrarFiltro(th, event, columna); break;
+            case 'stats': mostrarEstadisticas(columna, nombreColumna); break;
+            case 'zoom': zoomASeleccion(columna); break;
+            case 'pan': panASeleccion(columna); break;
+            case 'export': exportarTabla(); break;
+          }
+        };
+      });
+      
+      setTimeout(() => {
+        document.addEventListener('click', function cerrarMenu() {
+          menu.remove();
+          document.removeEventListener('click', cerrarMenu);
+        });
+      }, 100);
+    }
+    
+    function mostrarFiltro(th, event, columna) {
+      const filtroExistente = document.querySelector('.filter-container');
+      if (filtroExistente) filtroExistente.remove();
+      
+      const filtro = document.createElement('div');
+      filtro.className = 'filter-container';
+      filtro.style.left = event.pageX + 'px';
+      filtro.style.top = event.pageY + 'px';
+      
+      const registros = tipoActual === 'malla' ? todosLosRegistros : todosLosRegistrosCiclorrutas;
+      const valoresUnicos = [...new Set(registros.map(r => r.attributes[columna]))].filter(v => v != null).sort();
+      
+      const filtrosActuales = tipoActual === 'malla' ? filtrosActivos : filtrosActivosCiclorrutas;
+      
+      filtro.innerHTML = `
+        <input type="text" class="filter-input" placeholder="Buscar...">
+        <div style="max-height: 200px; overflow-y: auto; margin: 5px 0;">
+          ${valoresUnicos.map(valor => `
+            <label style="display: block; padding: 5px; cursor: pointer;">
+              <input type="checkbox" value="${valor}" ${filtrosActuales[columna]?.includes(valor) ? 'checked' : ''}> ${valor}
+            </label>
+          `).join('')}
+        </div>
+        <div class="filter-buttons">
+          <button class="apply-btn">Aplicar</button>
+          <button class="clear-btn">Limpiar</button>
+        </div>
+      `;
+      
+      document.body.appendChild(filtro);
+      
+      const input = filtro.querySelector('.filter-input');
+      const checkboxes = filtro.querySelectorAll('input[type="checkbox"]');
+      const applyBtn = filtro.querySelector('.apply-btn');
+      const clearBtn = filtro.querySelector('.clear-btn');
+      
+      input.oninput = function() {
+        const texto = this.value.toLowerCase();
+        checkboxes.forEach(cb => {
+          const label = cb.parentElement;
+          const valor = cb.value.toLowerCase();
+          label.style.display = valor.includes(texto) ? 'block' : 'none';
+        });
+      };
+      
+      applyBtn.onclick = function() {
+        const seleccionados = Array.from(checkboxes).filter(cb => cb.checked).map(cb => cb.value);
+        if (seleccionados.length > 0) {
+          if (tipoActual === 'malla') {
+            filtrosActivos[columna] = seleccionados;
+          } else {
+            filtrosActivosCiclorrutas[columna] = seleccionados;
+          }
+        } else {
+          if (tipoActual === 'malla') {
+            delete filtrosActivos[columna];
+          } else {
+            delete filtrosActivosCiclorrutas[columna];
+          }
+        }
+        aplicarFiltros();
+        filtro.remove();
+      };
+      
+      clearBtn.onclick = function() {
+        if (tipoActual === 'malla') {
+          delete filtrosActivos[columna];
+        } else {
+          delete filtrosActivosCiclorrutas[columna];
+        }
+        aplicarFiltros();
+        filtro.remove();
+      };
+      
+      setTimeout(() => {
+        document.addEventListener('click', function cerrarFiltro(e) {
+          if (!filtro.contains(e.target)) {
+            filtro.remove();
+            document.removeEventListener('click', cerrarFiltro);
+          }
+        });
+      }, 100);
+    }
+    
+    function aplicarFiltros() {
+      const tablaId = tipoActual === 'malla' ? "#tablaMalla" : "#tablaCiclorrutas";
+      const tbody = document.querySelector(tablaId + " tbody");
+      const filas = tbody.querySelectorAll("tr");
+      const registros = tipoActual === 'malla' ? todosLosRegistros : todosLosRegistrosCiclorrutas;
+      const filtrosActuales = tipoActual === 'malla' ? filtrosActivos : filtrosActivosCiclorrutas;
+      
+      filas.forEach((fila, index) => {
+        const registro = registros[index];
+        let mostrar = true;
+        
+        for (let columna in filtrosActuales) {
+          const valorRegistro = String(registro.attributes[columna] || '');
+          if (!filtrosActuales[columna].includes(valorRegistro)) {
+            mostrar = false;
+            break;
+          }
+        }
+        
+        fila.style.display = mostrar ? '' : 'none';
+      });
+    }
+    
+    function mostrarEstadisticas(columna, nombreColumna) {
+      const registros = tipoActual === 'malla' ? todosLosRegistros : todosLosRegistrosCiclorrutas;
+      const valores = registros.map(r => r.attributes[columna]).filter(v => v != null && v !== '');
+      
+      if (valores.length === 0) {
+        alert('No hay datos para calcular estadísticas');
+        return;
+      }
+      
+      const numeros = valores.map(v => parseFloat(v)).filter(n => !isNaN(n));
+      
+      let mensaje = `Estadísticas para: ${nombreColumna}\n\n`;
+      mensaje += `Total de registros: ${valores.length}\n`;
+      
+      if (numeros.length > 0) {
+        const suma = numeros.reduce((a, b) => a + b, 0);
+        const promedio = suma / numeros.length;
+        const min = Math.min(...numeros);
+        const max = Math.max(...numeros);
+        
+        mensaje += `\nEstadísticas numéricas:\n`;
+        mensaje += `- Suma: ${suma.toFixed(2)}\n`;
+        mensaje += `- Promedio: ${promedio.toFixed(2)}\n`;
+        mensaje += `- Mínimo: ${min.toFixed(2)}\n`;
+        mensaje += `- Máximo: ${max.toFixed(2)}\n`;
+      } else {
+        const unicos = [...new Set(valores)];
+        mensaje += `\nValores únicos: ${unicos.length}\n`;
+        const conteo = {};
+        valores.forEach(v => conteo[v] = (conteo[v] || 0) + 1);
+        mensaje += `\nMás frecuentes:\n`;
+        Object.entries(conteo).sort((a, b) => b[1] - a[1]).slice(0, 5).forEach(([valor, cant]) => {
+          mensaje += `- ${valor}: ${cant}\n`;
+        });
+      }
+      
+      alert(mensaje);
+    }
+    
+    function zoomASeleccion(columna) {
+      const registros = tipoActual === 'malla' ? todosLosRegistros : todosLosRegistrosCiclorrutas;
+      const geometrias = registros.filter(r => r.geometry).map(r => r.geometry);
+      
+      if (geometrias.length === 0) {
+        alert('No hay geometrías para hacer zoom');
+        return;
+      }
+      
+      let xmin = Infinity, ymin = Infinity, xmax = -Infinity, ymax = -Infinity;
+      
+      geometrias.forEach(geom => {
+        if (geom.type === 'point') {
+          xmin = Math.min(xmin, geom.x);
+          ymin = Math.min(ymin, geom.y);
+          xmax = Math.max(xmax, geom.x);
+          ymax = Math.max(ymax, geom.y);
+        } else {
+          const extent = geom.getExtent();
+          xmin = Math.min(xmin, extent.xmin);
+          ymin = Math.min(ymin, extent.ymin);
+          xmax = Math.max(xmax, extent.xmax);
+          ymax = Math.max(ymax, extent.ymax);
+        }
+      });
+      
+      const extent = new esri.geometry.Extent(xmin, ymin, xmax, ymax, geometrias[0].spatialReference);
+      map.setExtent(extent.expand(1.2), true);
+    }
+    
+    function panASeleccion(columna) {
+      zoomASeleccion(columna);
+    }
+    
+    function exportarTabla() {
+      const tablaId = tipoActual === 'malla' ? 'tablaMalla' : 'tablaCiclorrutas';
+      const tabla = document.getElementById(tablaId);
+      const filas = tabla.querySelectorAll('tr');
+      let csv = [];
+      
+      filas.forEach(fila => {
+        const celdas = fila.querySelectorAll('th, td');
+        const filaData = Array.from(celdas).map(celda => {
+          let texto = celda.textContent.trim().replace('⋮', '');
+          if (texto.includes(',') || texto.includes('"')) {
+            texto = '"' + texto.replace(/"/g, '""') + '"';
+          }
+          return texto;
+        });
+        csv.push(filaData.join(','));
+      });
+      
+      const csvString = csv.join('\n');
+      const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = (tipoActual === 'malla' ? 'malla_vial' : 'ciclorrutas') + '_export.csv';
+      link.click();
+    }
+    
+    // Agregar eventos a ambas tablas
+    document.querySelectorAll('#tablaMalla th, #tablaCiclorrutas th').forEach(th => {
+      const filterIcon = th.querySelector('.filter-icon');
+      if (filterIcon) {
+        filterIcon.onclick = function(e) {
+          e.stopPropagation();
+          mostrarMenuOpciones(th, e);
+        };
+      }
+    });
+    
+    // ============= CONTROL DE CAPAS Y BASEMAPS =============
+    
+    const layerControlHeader = document.querySelector('.layer-control-header');
+    const layerControlContent = document.querySelector('.layer-control-content');
+    const layerControlToggle = document.querySelector('.layer-control-toggle');
+    
+    layerControlHeader.onclick = function() {
+      const isCollapsed = layerControlContent.style.display === 'none';
+      layerControlContent.style.display = isCollapsed ? 'block' : 'none';
+      layerControlToggle.classList.toggle('collapsed');
+    };
+    
+    document.querySelectorAll('.basemap-item').forEach(item => {
+      item.onclick = function() {
+        const basemap = this.dataset.basemap;
+        map.setBasemap(basemap);
+        document.querySelectorAll('.basemap-item').forEach(i => i.classList.remove('active'));
+        this.classList.add('active');
+        this.querySelector('input[type="radio"]').checked = true;
+      };
+    });
+    
+    const capasMap = {
+      'layer-malla': mallaLayer,
+      'layer-ciclorrutas-contratista': CiclorrutasContratista,
+      'layer-calzada': malla2026,
+      'layer-ciclorrutas': Ciclorruta,
+      'layer-unidad': UnidadMuestra,
+      'layer-fallas': fallasLayer,
+      'layer-fallas-ciclorrutas': fallasCiclorrutas
+    };
+    
+    Object.keys(capasMap).forEach(layerId => {
+      const checkbox = document.getElementById(layerId);
+      const layer = capasMap[layerId];
+      const opacityControl = document.getElementById('opacity-' + layerId.replace('layer-', ''));
+      
+      checkbox.onchange = function() {
+        if (this.checked) {
+          layer.show();
+          if (opacityControl) opacityControl.style.display = 'none';
+        } else {
+          layer.hide();
+          if (opacityControl) opacityControl.style.display = 'none';
+        }
+      };
+      
+      const layerItem = checkbox.parentElement;
+      layerItem.ondblclick = function(e) {
+        if (e.target.tagName !== 'INPUT') {
+          e.stopPropagation();
+          if (checkbox.checked && opacityControl) {
+            const isVisible = opacityControl.style.display !== 'none';
+            opacityControl.style.display = isVisible ? 'none' : 'flex';
+          }
+        }
+      };
+      
+      if (opacityControl) {
+        const rangeInput = opacityControl.querySelector('input[type="range"]');
+        const opacityValue = opacityControl.querySelector('.opacity-value');
+        
+        rangeInput.oninput = function() {
+          const opacity = this.value / 100;
+          layer.setOpacity(opacity);
+          opacityValue.textContent = this.value + '%';
+        };
+      }
+    });
+    
+    document.querySelectorAll('.layer-item label').forEach(label => {
+      label.title = 'Doble clic para ajustar opacidad';
+    });
   }
 });
 </script>
