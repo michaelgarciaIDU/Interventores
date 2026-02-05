@@ -17,7 +17,6 @@ html, body { height: 100%; margin: 0; font-family: Arial; }
 #panelFallas, #panelFotos { height: 50%; padding: 10px; overflow: auto; }
 #panelFallas { border-bottom: 2px solid #ddd; }
 
-/* Pestañas */
 .tabs {
   display: flex;
   background: #f0f0f0;
@@ -69,7 +68,6 @@ tr:hover { background: #f1f1f1; cursor: pointer; }
 .hidden { display: none !important; }
 .select-editor { width: 100%; padding: 2px; }
 
-/* Panel de control de capas */
 .layer-control {
   position: absolute;
   top: 10px;
@@ -204,7 +202,6 @@ tr:hover { background: #f1f1f1; cursor: pointer; }
   min-width: 35px;
 }
 
-/* Estilos para el menú de opciones */
 .table-options {
   position: absolute;
   background: white;
@@ -232,7 +229,6 @@ tr:hover { background: #f1f1f1; cursor: pointer; }
   border-bottom: none;
 }
 
-/* Estilos para el filtro */
 .filter-input {
   width: 90%;
   padding: 4px;
@@ -288,14 +284,12 @@ tr:hover { background: #f1f1f1; cursor: pointer; }
 <div id="contenedor">
   <div id="izquierda">
     <div id="map">
-      <!-- Panel de control de capas -->
       <div class="layer-control">
         <div class="layer-control-header">
           <span>Capas y Mapas Base</span>
           <span class="layer-control-toggle collapsed">▼</span>
         </div>
         <div class="layer-control-content" style="display: none;">
-          <!-- Sección de Mapas Base -->
           <div class="layer-control-section">
             <div class="layer-control-section-title">Mapas Base</div>
             <div class="basemap-item active" data-basemap="gray">
@@ -328,7 +322,6 @@ tr:hover { background: #f1f1f1; cursor: pointer; }
             </div>
           </div>
           
-          <!-- Sección de Capas -->
           <div class="layer-control-section">
             <div class="layer-control-section-title">Capas</div>
             
@@ -407,13 +400,11 @@ tr:hover { background: #f1f1f1; cursor: pointer; }
       </div>
     </div>
     <div id="tablaContainer">
-      <!-- Pestañas -->
       <div class="tabs">
         <button class="tab active" data-tab="malla-vial">Malla Vial</button>
         <button class="tab" data-tab="ciclorrutas">Ciclorrutas</button>
       </div>
-      
-      <!-- Contenido Malla Vial -->
+      <!-- MALLA VIAL -->
       <div id="malla-vial" class="tab-content active">
         <table id="tablaMalla">
           <thead>
@@ -445,7 +436,7 @@ tr:hover { background: #f1f1f1; cursor: pointer; }
         </table>
       </div>
       
-      <!-- Contenido Ciclorrutas -->
+      <!-- CICLORRUTAS -->
       <div id="ciclorrutas" class="tab-content">
         <table id="tablaCiclorrutas">
           <thead>
@@ -591,7 +582,7 @@ require([
       
       malla2026.setLabelingInfo([labelClass]);
       malla2026.setScaleRange(50000, 0);
-      
+     // ========== CAPAS DE CICLORRUTAS ========== 
     const Ciclorruta = new FeatureLayer(
       "https://services3.arcgis.com/7Be6bWZhk16f3JwA/arcgis/rest/services/Ciclorruta_2026/FeatureServer/0",
       { outFields: ["*"], mode: FeatureLayer.MODE_ONDEMAND}
@@ -638,7 +629,7 @@ require([
       });
       
     Ciclorruta.setLabelingInfo([labelClassCR]);
-    
+    // ========== CAPAS DE UNIDAD DE MUESTRA ==========
     const UnidadMuestra = new FeatureLayer(
       "https://services3.arcgis.com/7Be6bWZhk16f3JwA/arcgis/rest/services/UnidaddeMuestraMV2026/FeatureServer/0",
       { outFields: ["*"], mode: FeatureLayer.MODE_ONDEMAND}
@@ -696,7 +687,7 @@ require([
     let todosLosRegistrosCiclorrutas = [];
     let filtrosActivos = {};
     let filtrosActivosCiclorrutas = {};
-    let tipoActual = 'malla'; // 'malla' o 'ciclorrutas'
+    let tipoActual = 'malla';
     
     mallaLayer.on("update-end", function() {
       if (!tablaCargadaTotal) {
@@ -1048,6 +1039,7 @@ require([
         <td>${g.attributes.pk_id_um || ""}</td>
         <td>${g.attributes.tipo_falla || ""}</td>
         <td>${g.attributes.severidad || ""}</td>
+        <td>${g.attributes.extension || ""}</td>
       `;
 
       tr.onclick = function () {
@@ -1100,23 +1092,18 @@ require([
     mostrarFallas(fallasLayer, 'pk_id_calzada');
     mostrarFallas(fallasCiclorrutas, 'pk_id_ciclorruta');
     
-    // ========== SISTEMA DE PESTAÑAS ==========
     document.querySelectorAll('.tab').forEach(tab => {
       tab.onclick = function() {
         const tabId = this.dataset.tab;
         
-        // Cambiar pestañas activas
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
         this.classList.add('active');
         
-        // Cambiar contenido activo
         document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
         document.getElementById(tabId).classList.add('active');
         
-        // Actualizar tipo actual
         tipoActual = tabId === 'malla-vial' ? 'malla' : 'ciclorrutas';
         
-        // Limpiar panel de fallas
         document.querySelector("#tablaFallas tbody").innerHTML = "";
         document.getElementById("panelFotos").innerHTML = "<h3>Fotos</h3><em>Seleccione un elemento para ver fotos</em>";
       };
@@ -1138,11 +1125,8 @@ require([
       const nombreColumna = th.textContent.replace('⋮', '').trim();
       
       menu.innerHTML = `
-        <div class="table-options-item" data-action="filter">🔍 Filtrar</div>
-        <div class="table-options-item" data-action="stats">📊 Estadísticas</div>
-        <div class="table-options-item" data-action="zoom">🔎 Hacer zoom</div>
-        <div class="table-options-item" data-action="pan">🗺️ Desplazar a</div>
-        <div class="table-options-item" data-action="export">📥 Exportar</div>
+        <div class="table-options-item" data-action="filter">Filtrar</div>
+        <div class="table-options-item" data-action="export">Exportar</div>
       `;
       
       document.body.appendChild(menu);
@@ -1154,9 +1138,6 @@ require([
           
           switch(action) {
             case 'filter': mostrarFiltro(th, event, columna); break;
-            case 'stats': mostrarEstadisticas(columna, nombreColumna); break;
-            case 'zoom': zoomASeleccion(columna); break;
-            case 'pan': panASeleccion(columna); break;
             case 'export': exportarTabla(); break;
           }
         };
@@ -1277,78 +1258,7 @@ require([
       });
     }
     
-    function mostrarEstadisticas(columna, nombreColumna) {
-      const registros = tipoActual === 'malla' ? todosLosRegistros : todosLosRegistrosCiclorrutas;
-      const valores = registros.map(r => r.attributes[columna]).filter(v => v != null && v !== '');
-      
-      if (valores.length === 0) {
-        alert('No hay datos para calcular estadísticas');
-        return;
-      }
-      
-      const numeros = valores.map(v => parseFloat(v)).filter(n => !isNaN(n));
-      
-      let mensaje = `Estadísticas para: ${nombreColumna}\n\n`;
-      mensaje += `Total de registros: ${valores.length}\n`;
-      
-      if (numeros.length > 0) {
-        const suma = numeros.reduce((a, b) => a + b, 0);
-        const promedio = suma / numeros.length;
-        const min = Math.min(...numeros);
-        const max = Math.max(...numeros);
-        
-        mensaje += `\nEstadísticas numéricas:\n`;
-        mensaje += `- Suma: ${suma.toFixed(2)}\n`;
-        mensaje += `- Promedio: ${promedio.toFixed(2)}\n`;
-        mensaje += `- Mínimo: ${min.toFixed(2)}\n`;
-        mensaje += `- Máximo: ${max.toFixed(2)}\n`;
-      } else {
-        const unicos = [...new Set(valores)];
-        mensaje += `\nValores únicos: ${unicos.length}\n`;
-        const conteo = {};
-        valores.forEach(v => conteo[v] = (conteo[v] || 0) + 1);
-        mensaje += `\nMás frecuentes:\n`;
-        Object.entries(conteo).sort((a, b) => b[1] - a[1]).slice(0, 5).forEach(([valor, cant]) => {
-          mensaje += `- ${valor}: ${cant}\n`;
-        });
-      }
-      
-      alert(mensaje);
-    }
     
-    function zoomASeleccion(columna) {
-      const registros = tipoActual === 'malla' ? todosLosRegistros : todosLosRegistrosCiclorrutas;
-      const geometrias = registros.filter(r => r.geometry).map(r => r.geometry);
-      
-      if (geometrias.length === 0) {
-        alert('No hay geometrías para hacer zoom');
-        return;
-      }
-      
-      let xmin = Infinity, ymin = Infinity, xmax = -Infinity, ymax = -Infinity;
-      
-      geometrias.forEach(geom => {
-        if (geom.type === 'point') {
-          xmin = Math.min(xmin, geom.x);
-          ymin = Math.min(ymin, geom.y);
-          xmax = Math.max(xmax, geom.x);
-          ymax = Math.max(ymax, geom.y);
-        } else {
-          const extent = geom.getExtent();
-          xmin = Math.min(xmin, extent.xmin);
-          ymin = Math.min(ymin, extent.ymin);
-          xmax = Math.max(xmax, extent.xmax);
-          ymax = Math.max(ymax, extent.ymax);
-        }
-      });
-      
-      const extent = new esri.geometry.Extent(xmin, ymin, xmax, ymax, geometrias[0].spatialReference);
-      map.setExtent(extent.expand(1.2), true);
-    }
-    
-    function panASeleccion(columna) {
-      zoomASeleccion(columna);
-    }
     
     function exportarTabla() {
       const tablaId = tipoActual === 'malla' ? 'tablaMalla' : 'tablaCiclorrutas';
@@ -1376,7 +1286,6 @@ require([
       link.click();
     }
     
-    // Agregar eventos a ambas tablas
     document.querySelectorAll('#tablaMalla th, #tablaCiclorrutas th').forEach(th => {
       const filterIcon = th.querySelector('.filter-icon');
       if (filterIcon) {
